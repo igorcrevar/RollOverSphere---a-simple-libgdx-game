@@ -27,8 +27,8 @@ public class UpgradeSpeed extends Box{
 	}
 
 	@Override
-	public BoxType getUpgrade(){
-		return BoxType.UPGRADE_SPEED;
+	public UpgradeType getUpgradeType(){
+		return UpgradeType.UPGRADE_SPEED;
 	}
 	
 	@Override

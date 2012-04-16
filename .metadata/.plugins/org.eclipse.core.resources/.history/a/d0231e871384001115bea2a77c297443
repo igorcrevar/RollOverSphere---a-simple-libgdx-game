@@ -1,0 +1,5 @@
+package com.igorcrevar.rolloversphere.objects.boxes;
+
+public enum BoxType {
+
+}

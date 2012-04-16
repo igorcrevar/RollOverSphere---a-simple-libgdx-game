@@ -28,8 +28,8 @@ public class UpgradeDirection extends Box{
 	}
 	
 	@Override
-	public BoxType getUpgrade(){
-		return BoxType.UPGRADE_EASY_CHANGE_DIRECTION;
+	public UpgradeType getUpgradeType(){
+		return UpgradeType.UPGRADE_EASY_CHANGE_DIRECTION;
 	}
 	
 	@Override

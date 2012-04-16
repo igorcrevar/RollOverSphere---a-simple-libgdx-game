@@ -34,6 +34,7 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 	private Game mGame;
 	private BitmapFont mFont;
 	private MyInputAdapter mInputAdapter;
+	private Thread mMusicThread;
 	
 	private Camera mOtherCam;
 	private SpriteBatch mSpriteBatch;
@@ -44,8 +45,9 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 	public MainMenuScreen (Game game) {
 		mFont = AssetsHelper.font;		
 		mGame = game;		
-		mOptions = new OptionItem[] { new OptionItem("Arcade", GameTypes.ARCADE), new OptionItem("Challenge", GameTypes.CHALLENGE), 
-									  new OptionItem("Freeplay!", GameTypes.FREEPLAY) };
+		mOptions = new OptionItem[] { 
+				new OptionItem("Arcade", GameTypes.ARCADE), new OptionItem("Challenge", GameTypes.CHALLENGE), 
+				new OptionItem("Freeplay!", GameTypes.FREEPLAY) };
 		
 		mSpriteBatch = new SpriteBatch();
 		mInputAdapter = new MyInputAdapter(this);
@@ -149,7 +151,11 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 
 	@Override
 	public void hide() {
-		SettingsHelper.save();
+		try {
+			mMusicThread.join();
+		} catch (InterruptedException e) {
+		};
+		AssetsHelper.music.stop();
 	}
 
 	@Override
@@ -175,26 +181,25 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 
 	@Override
 	public void resume() {
-		Gdx.input.setInputProcessor(mInputAdapter);
-		Gdx.input.setCatchBackKey(false);
 	}
 
 	@Override
 	public void show() {
 		Gdx.input.setInputProcessor(mInputAdapter);
-		Gdx.input.setCatchBackKey(false);
 		
 		//play our theme melody after some time
-		new Thread(new Runnable() {			
+		mMusicThread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
 				}
-				AssetsHelper.music.play();
+				AssetsHelper.music.play();				
 			}
-		}).start();
+		});
+		
+		mMusicThread.start();
 	}
 
 	@Override
@@ -213,7 +218,6 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 
 	@Override
 	public void onBack() {
-		mGame.getScreen().hide();
 	}
 
 }

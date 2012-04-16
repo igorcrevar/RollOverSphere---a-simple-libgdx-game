@@ -1,0 +1,7 @@
+package com.igorcrevar.rolloversphere.objects.boxes;
+
+public enum BoxType {
+	NOT_UPGRADE,
+	UPGRADE_EASY_CHANGE_DIRECTION,
+	UPGRADE_SPEED
+}

@@ -11,7 +11,6 @@ public class Box extends GameObject {
 	protected float mAngle = 0.0f;
 	protected int mPoints;
 	protected float mRotationSpeed;
-	protected int mType; //can be used to store 
 	
 	//TODO: grid random positioning
 	//public int gridX;
@@ -22,7 +21,6 @@ public class Box extends GameObject {
 		mPoints = 5;
 		mRotationSpeed = 20.0f;
 		setColor(1.0f, 0.0f, 0.0f, 1.0f);
-		mType = 0;
 	}
 	
 	public Box(float[] color, int points, float fadeoutSpeed, float rotationSpeed){
@@ -30,7 +28,6 @@ public class Box extends GameObject {
 		mPoints = points;
 		mFadeoutSpeed = fadeoutSpeed;
 		mRotationSpeed = rotationSpeed;
-		mType = 0;
 	}
 	
 	public final void setPointsWorth(int v){
@@ -107,8 +104,8 @@ public class Box extends GameObject {
 	 * Override in childs to specify type of upgrade(if upgrade point box)
 	 * @return
 	 */
-	public BoxType getUpgrade(){
-		return BoxType.NOT_UPGRADE;
+	public UpgradeType getUpgradeType(){
+		return UpgradeType.NOT_UPGRADE;
 	}
 	
 	/**
@@ -119,12 +116,8 @@ public class Box extends GameObject {
 		return 10;
 	}
 	
-	public int getType(){
-		return mType;
-	}
-	
-	public void setType(int type){
-		mType = type;
+	public boolean isNormalBox(){
+		return UpgradeType.NOT_UPGRADE == getUpgradeType();
 	}
 
 }

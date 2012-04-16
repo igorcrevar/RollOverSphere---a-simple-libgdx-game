@@ -1,0 +1,30 @@
+package com.igorcrevar.punchthecircle;
+
+import com.badlogic.gdx.math.Vector3;
+import com.igorcrevar.punchthecircle.collsion.CollisionSolver;
+import com.igorcrevar.punchthecircle.collsion.ICollisionIterationHandler;
+
+public class Test implements ICollisionIterationHandler{
+	private static class SimpleTag
+	{
+		public SimpleTag(String t){
+			text = t;
+		}
+		public String text;
+	}
+	
+	public static void main(String[] argv) {
+		ICollisionIterationHandler handler = new Test();
+		Vector3 posStart = new Vector3();
+		Vector3 posEnd = new Vector3();
+		Object tag = new Test.SimpleTag("Federer");
+		CollisionSolver.iterateOver(handler, posStart, posEnd, tag );
+	}
+	
+	@Override
+	public boolean iterationHandler(Vector3 position, Object tag) {
+		
+		return true;
+	}
+
+}

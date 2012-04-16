@@ -13,7 +13,7 @@ public class SettingsHelper {
 	private final static String mFile = ".punchthecircle";
 	public static boolean soundEnabled = true; //doest matter right now
 	public static boolean isAcceleatorEnabled = true;
-	public static int arcadeGameTimeout = 60; //in seconds
+	public static float arcadeGameTimeout = 31.0f; //in seconds
 	public static int[] highscores = new int[] { 100, 80, 50 }; //arcade, chalenge, freeplay
 
 	public static void load () {

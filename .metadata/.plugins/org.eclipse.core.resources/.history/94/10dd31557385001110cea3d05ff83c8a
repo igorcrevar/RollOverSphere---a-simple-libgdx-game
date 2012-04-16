@@ -1,0 +1,171 @@
+package com.igorcrevar.rolloversphere.objects;
+
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector3;
+import com.igorcrevar.rolloversphere.collsion.CollisionSolver;
+import com.igorcrevar.rolloversphere.mesh_gl10.AbstractMesh;
+import com.igorcrevar.rolloversphere.mesh_gl10.BallMesh;
+import com.igorcrevar.rolloversphere.mesh_gl10.MeshManager;
+import com.igorcrevar.rolloversphere.objects.boxes.UpgradeType;
+import com.igorcrevar.rolloversphere.texture.TextureManager;
+
+public class ChuckSphere extends GameObject{
+	public static final float DEFAULT_FRICTION = 0.85f;
+	public static final float SMALL_FRICTION = 0.65f;
+	public float maxZ;
+	public float maxX;
+	public float minX;
+	public float minZ;
+	
+	public Vector3 movingVelocity = new Vector3(0.0f, 0.0f, 0.0f); //in seconds
+	public float friction = DEFAULT_FRICTION;
+	
+	private Vector3 mRotationReal = new Vector3(0.0f, 0.0f, 0.0f);
+	private float mVelocityNormalizer;
+	private UpgradeType mUpgradeType; 
+	
+	public ChuckSphere(){
+	}
+	
+	@Override
+	protected Texture getTexture() {
+		return TextureManager.getInstance().getTexture("badlogic");
+	}
+
+	@Override
+	protected AbstractMesh getMesh() {
+		BallMesh mesh = (BallMesh)MeshManager.getInstance().getMesh("ball");
+		boundingSphereR = mesh.r;
+		return mesh;
+	}
+	
+	@Override
+	public void update(float timeDiff) {
+		//update position and rotation
+		position.x += timeDiff * movingVelocity.x;
+		position.z += timeDiff * movingVelocity.z;
+		
+		//update rotations
+		mRotationReal.x = fixRotation(mRotationReal.x + timeDiff * movingVelocity.z * 8);
+		mRotationReal.z = fixRotation(mRotationReal.z - timeDiff * movingVelocity.x * 8);
+		
+		//gimbal lock solver - just pick "more important" rotation on every frame
+ 		if (Math.abs(movingVelocity.z) >= Math.abs(movingVelocity.x)){
+			rotation.x = mRotationReal.x;
+			rotation.z = 0.0f;
+		}
+		else{
+			rotation.x = 0.0f;
+			rotation.z = mRotationReal.z;
+		}
+		
+		//update velocities
+		movingVelocity.x -= movingVelocity.x * friction * timeDiff;
+		movingVelocity.z -= movingVelocity.z * friction * timeDiff;		
+	
+		//handle position boundaries
+		if (position.x < minX){
+			position.x = minX;
+			movingVelocity.x = -movingVelocity.x;
+		}
+		
+		if (position.x > maxX){
+			position.x = maxX;
+			movingVelocity.x = -movingVelocity.x;
+		}
+		
+		if (position.z < minZ){
+			position.z = minZ;
+			movingVelocity.z = -movingVelocity.z;
+		}
+		
+		if (position.z > maxZ){
+			position.z = maxZ;
+			movingVelocity.z = -movingVelocity.z;
+		}
+	}
+	
+	private float fixRotation(float value){
+		if (value > 360.0f){
+			return 360.0f - value;
+		}
+		else if (value < 0){
+			return value + 360.0f;
+		}
+		
+		return value;
+	}
+
+	/**
+	 * Change velocity of chuck sphere
+	 * @param dx increment(decrement) for velocity x component 
+	 * @param dz increment(decrement) for velocity z component
+	 */
+	public void updatePlayerVelocity(float dx, float dz ){
+		switch (mUpgradeType){
+		case NOT_UPGRADE:
+			dx = dx * mVelocityNormalizer;
+			dz  = dz  * mVelocityNormalizer;
+			
+			friction = ChuckSphere.DEFAULT_FRICTION;
+			movingVelocity.x = fixVelocity(movingVelocity.x + dx);
+			movingVelocity.z = fixVelocity(movingVelocity.z + dz);
+			break;
+		case UPGRADE_EASY_CHANGE_DIRECTION:
+			dx = dx * mVelocityNormalizer;
+			dz  = dz  * mVelocityNormalizer;
+			
+			int oldSign = CollisionSolver.getSign(movingVelocity.x);
+			int incSign = CollisionSolver.getSign(dx);
+			if (Math.abs(oldSign - incSign) == 2){
+				movingVelocity.x = 0.0f;// -movingVelocity.x;
+			}
+			
+			oldSign = CollisionSolver.getSign(movingVelocity.y);
+			incSign = CollisionSolver.getSign(dz );
+			if (Math.abs(oldSign - incSign) == 2){
+				movingVelocity.y = 0.0f;
+			}
+			
+			friction = ChuckSphere.DEFAULT_FRICTION;
+			movingVelocity.x = fixVelocity(movingVelocity.x + dx);
+			movingVelocity.z = fixVelocity(movingVelocity.z + dz);
+			break;
+		case UPGRADE_SPEED:
+			dx = dx * mVelocityNormalizer;
+			dz  = dz  * mVelocityNormalizer;
+			
+			friction = ChuckSphere.DEFAULT_FRICTION;
+			movingVelocity.x = fixVelocity(movingVelocity.x + dx);
+			movingVelocity.z = fixVelocity(movingVelocity.z + dz);
+			break;
+		}
+	}
+	
+	/**
+	 * Updates moving velocity towards z axis
+	 */
+	public void updatePlayerVelocityZSpecial() {
+		if (movingVelocity.z < 0){
+			movingVelocity.z = fixVelocity(movingVelocity.z - 120.0f);
+		}
+		else{
+			movingVelocity.z = fixVelocity(movingVelocity.z + 120.0f);
+		}
+	}
+	
+	/**
+	 * Fix velocity so it doesnt exceed boundaries
+	 * @param velocity
+	 * @return velocity in boundaries
+	 */
+	private float fixVelocity(float v){
+		if (v > 480.0f){
+			return 480.0f;
+		}
+		if (v < -480.0f){
+			return -480.0f;
+		}
+		return v;
+	}
+}

@@ -1,0 +1,23 @@
+package com.igorcrevar.punchthecircle.game;
+
+import com.badlogic.gdx.Game;
+import com.igorcrevar.punchthecircle.game.screens.MainMenuScreen;
+
+public class PunchTheCircle extends Game{
+
+	@Override
+	public void create() {
+		SettingsHelper.load();
+		AssetsHelper.load();
+		setScreen(new MainMenuScreen(this));
+	}
+
+	@Override
+	public void dispose () {
+		super.dispose();
+
+		AssetsHelper.free();
+		//SettingsHelper.save();
+		getScreen().dispose();
+	}
+}

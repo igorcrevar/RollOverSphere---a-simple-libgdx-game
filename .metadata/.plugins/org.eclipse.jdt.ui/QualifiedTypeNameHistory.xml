@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="com.igorcrevar.punchthecircle.Test.SimpleTag"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.math.Vector3"/>
+<fullyQualifiedTypeName name="com.igorcrevar.punchthecircle.collsion.ICollisionIterationHandler"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.audio.Music"/>
+<fullyQualifiedTypeName name="java.lang.Runnable"/>
+<fullyQualifiedTypeName name="com.igorcrevar.rolloversphere.objects.boxes.UpgradeSpeed"/>
+<fullyQualifiedTypeName name="com.igorcrevar.rolloversphere.objects.boxes.BoxType"/>
+<fullyQualifiedTypeName name="com.igorcrevar.rolloversphere.game.screens.TheGame.GameStatus"/>
+<fullyQualifiedTypeName name="com.igorcrevar.rolloversphere.objects.boxes.Box"/>
+<fullyQualifiedTypeName name="com.igorcrevar.rolloversphere.objects.boxes.UpgradeType"/>
+<fullyQualifiedTypeName name="com.igorcrevar.rolloversphere.game.SettingsHelper"/>
+<fullyQualifiedTypeName name="com.igorcrevar.rolloversphere.game.AssetsHelper"/>
+</qualifiedTypeNameHistroy>

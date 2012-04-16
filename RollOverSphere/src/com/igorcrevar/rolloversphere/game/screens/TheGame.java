@@ -1,5 +1,7 @@
 package com.igorcrevar.rolloversphere.game.screens;
 
+import java.util.List;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -10,7 +12,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
-import com.igorcrevar.rolloversphere.collsion.CollisionSolver;
+import com.igorcrevar.rolloversphere.game.GameTypes;
 import com.igorcrevar.rolloversphere.game.SettingsHelper;
 import com.igorcrevar.rolloversphere.input.IMyInputAdapter;
 import com.igorcrevar.rolloversphere.input.MyInputAdapter;
@@ -18,26 +20,36 @@ import com.igorcrevar.rolloversphere.objects.ChuckSphere;
 import com.igorcrevar.rolloversphere.objects.DynamicPlane;
 import com.igorcrevar.rolloversphere.objects.Floor;
 import com.igorcrevar.rolloversphere.objects.PointsManager;
-import com.igorcrevar.rolloversphere.objects.boxes.BoxType;
+import com.igorcrevar.rolloversphere.objects.boxes.Box;
 import com.igorcrevar.rolloversphere.objects.boxes.BoxesManager;
+import com.igorcrevar.rolloversphere.objects.boxes.UpgradeType;
 import com.igorcrevar.rolloversphere.objects.boxes.factory.IBoxesFactory;
 
 public abstract class TheGame implements Screen, IMyInputAdapter{
-	protected final ChuckSphere mMainBall = new ChuckSphere();
+	protected final ChuckSphere mChuckSphere = new ChuckSphere();
 	protected final DynamicPlane mWaterBackground = new DynamicPlane();
 	protected final Floor mFloor = new Floor();
-	protected long mLastTime;
 	protected BoxesManager mBoxesManager;
 	protected PointsManager mPointsManager;
 	protected BitmapFont mFont;
+	protected MyInputAdapter mInputAdapter;
 	
 	protected SpriteBatch mSpriteBatch;	
 	protected PerspectiveCamera mCamera;
-	protected Vector3 mLastBallPos;
 	
+	protected Game mGame;
+	protected enum GameStatus{
+		PLAY, GAMEOVER
+	}
+	protected GameStatus mGameStatus;
+	protected Thread mBoxThread;
+	protected GameTypes mGameType;
+	//
+	protected float mGameOverTimer;
+
 	//upgrade
-	protected BoxType mUpgradeType = BoxType.NOT_UPGRADE;
-	protected long mUpgradeTimeStarted;
+	protected UpgradeType mUpgradeType = UpgradeType.NOT_UPGRADE;
+	protected float mUpgradeTimer;
 	protected int mUpgradeTimeout;
 	//TODO: budz!!!!
 	protected enum NotifStates{
@@ -47,29 +59,14 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 	protected Color mNotifTextColor;
 	protected NotifStates mNotifTextAnimationState; //0 - fade in 1 - fade out, 2 - not show
 	
-	private MyInputAdapter mInputAdapter;
-	protected Game mGame;
-	protected enum GameStatus{
-		PLAY, GAMEOVER, EXIT
-	}
-	protected GameStatus mGameStatus;
-	protected GameStatus mLastGameStatusBeforePause;
-	protected Thread mBoxThread;
-	
-	protected float mNormalSpeedDivider;
-	protected float mFastSpeedDivider;
-	
 	public TheGame(Game game) {
-		this.mGame = game;
+		mGame = game;
 		mInputAdapter = new MyInputAdapter(this);
 		mGameStatus = GameStatus.PLAY;
-		mNormalSpeedDivider = 6.0f;
-		mFastSpeedDivider = 4.0f;
+		mGameType = getGameType();
+		mGameOverTimer = 0;
 		init();
 	}
-	
-	//override it!
-	protected abstract IBoxesFactory getBoxesFactory();
 	
 	private void init(){
 		mNotifTextColor = Color.WHITE;
@@ -83,20 +80,17 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 		mBoxesManager.init(-30, 30, -80, 0);
 		
 		mWaterBackground.init();
-		mMainBall.init();
+		mChuckSphere.init();
 		mFloor.init();
 		
-		mMainBall.minX = -30;
-		mMainBall.maxX = 30;
-		mMainBall.maxZ = 0;
-		mMainBall.minZ = -80;
+		mChuckSphere.setBounds(-30.0f, 30.0f, -80.0f, 0.0f);
 		
 		mWaterBackground.rotation.x = 90;
 		mWaterBackground.position.x = 4;
 		mWaterBackground.position.y = 15;
 		mWaterBackground.position.z = -80.0f;
 		
-		mFloor.position.y = -mMainBall.boundingSphereR;
+		mFloor.position.y = -mChuckSphere.boundingSphereR;
 		mFloor.position.z = -40.0f;
 		
 		Gdx.input.setInputProcessor(new MyInputAdapter(this));
@@ -104,19 +98,10 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 		mBoxThread = getBoxThread();
 	}
 	
-	private float getTimeDiff(){
-		long time = System.currentTimeMillis();
-		if (mLastTime == 0){
-			mLastTime = time;
-			return 0;
-		}
-		
-		float timeDiff = (float)((time - mLastTime) / 1000.0);
-		mLastTime = time;
-		return timeDiff;
-	}
-	
-	protected void createNotification() {
+	protected void createNotification(UpgradeType upgradeType, int timeout) {			
+		mUpgradeTimer = 0;
+		mUpgradeType = upgradeType;
+		mUpgradeTimeout = timeout;
 		mNotifText = mUpgradeType.getText();
 		mNotifTextColor.a = 0.0f;
 		mNotifTextAnimationState = NotifStates.FADE_IN;
@@ -146,93 +131,79 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 		TextBounds bounds = mFont.getBounds(str);
 		float x = (Gdx.graphics.getWidth() - bounds.width) / 2;
 		float y = Gdx.graphics.getHeight() - (Gdx.graphics.getHeight() - bounds.height) / 2;
-		//mFont.setScale(2.2f * Gdx.graphics.getWidth() / 800);
 		mFont.setColor(color);
 		mFont.draw(mSpriteBatch, str, x, y);  
 	}
 	
-	protected void upgradeTimeoutUpdateAndRender(){
+	protected void upgradeTimeoutUpdateAndRender(float timeDelta){
 		//upgrade part
-		if (mUpgradeType != BoxType.NOT_UPGRADE){
-			int secs = (int)((mLastTime - mUpgradeTimeStarted) / 1000);
-			if (secs > mUpgradeTimeout){
+		if (mUpgradeType != UpgradeType.NOT_UPGRADE){
+			mUpgradeTimer += timeDelta;
+			if (mUpgradeTimer >= (float)mUpgradeTimeout){
 				//if timeout expires than we are not in upgrade state anymore
-				mUpgradeType = BoxType.NOT_UPGRADE;
+				mUpgradeType = UpgradeType.NOT_UPGRADE;
 			}
 			else{
-				String str = String.format("Upgrade: %d", mUpgradeTimeout - secs);
+				String str = String.format("Upgrade: %d", (int)(mUpgradeTimeout - mUpgradeTimer));
 				mFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
 				mFont.draw(mSpriteBatch, str, getScreenXEnd(200.0f), getScreenY(5.0f));
 			}
 		}
 	}
 	
-	private float fixSpeed(float v){
-		if (v > 480.0f){
-			return 480.0f;
-		}
-		if (v < -480.0f){
-			return -480.0f;
-		}
-		return v;
-	}
-	
-	private void killBoxThread(){
-		mGameStatus = GameStatus.EXIT;
-		while (mBoxThread.isAlive());
-	}
-	
 	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public void hide() {
-		killBoxThread();		
-	}
-
-	@Override
-	public void pause() {
-		mLastGameStatusBeforePause = mGameStatus;
-		killBoxThread();
-	}
-
-	@Override
-	public void render(float deltaTimeDoNotUse){
-		float timeDiff = getTimeDiff();
-		Gdx.gl.glClear(GL10.GL_DEPTH_BUFFER_BIT | GL10.GL_COLOR_BUFFER_BIT);
+	public void render(float deltaTime){
+		//Enables depth testing.
+		Gdx.gl.glEnable(GL10.GL_DEPTH_TEST);
+		Gdx.gl.glDepthFunc(GL10.GL_LEQUAL);
+		//blend
 		Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		Gdx.gl.glEnable(GL10.GL_BLEND);
-		Gdx.gl.glEnable(GL10.GL_DEPTH_TEST);
-
-		mWaterBackground.update(timeDiff);
-		mLastBallPos = mMainBall.position;
-		mMainBall.update(timeDiff);
+		Gdx.gl.glClear(GL10.GL_DEPTH_BUFFER_BIT | GL10.GL_COLOR_BUFFER_BIT);
+		
+		mWaterBackground.update(deltaTime);
+		mChuckSphere.update(deltaTime);
 				
 		mWaterBackground.render(mCamera);	    
 		mFloor.render(mCamera);
 		
-		renderGameSpecific(timeDiff);
+		//update and render boxes. return boxes collided with ball
+		mBoxesManager.doAll(mCamera, deltaTime, mChuckSphere.getPrevPosition(), 
+											   mChuckSphere.position, mChuckSphere.boundingSphereR);
+		//get all boxes our sphere collided with
+		List<Box> collided = mBoxesManager.getIntersectedBoxes(); 
+		if (collided != null){
+			Vector3 pos = new Vector3();
+			for (Box box: collided){
+				pos.set(box.position);
+				if (box.isNormalBox()){
+					//create point sprite
+					mCamera.project(pos);
+					mPointsManager.add(box.getPointsWorth(), pos.x, pos.y);						
+				}
+				else{
+					//if picked more than one upgrade - last one will be active!!!!					
+					//sphere need to know upgrade also
+					mChuckSphere.setUpgradeType(box.getUpgradeType());
+					//create upgrade notification and additional data for upgrade
+					createNotification(box.getUpgradeType(), box.getUpgradeTimeout());				
+				}
+			}
+		}			
 		
-		if (Gdx.app.getType() ==  com.badlogic.gdx.Application.ApplicationType.Android  
+		mChuckSphere.render(mCamera);
+		renderGameSpecific(deltaTime);
+		
+		if (Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android  
 			&& SettingsHelper.isAcceleatorEnabled) {
-			//todo: dirty fix
-			float dx = Gdx.input.getAccelerometerX();
-			float dy = Gdx.input.getAccelerometerY();
-			if (mUpgradeType != BoxType.UPGRADE_SPEED){
-				dx = dx * mNormalSpeedDivider;
-				dy = dy * mNormalSpeedDivider;
-			}
-			else{
-				dx = dx * mFastSpeedDivider;
-				dy = dy * mFastSpeedDivider;
-			}
-			updatePlayPosition(dx, dy);
+			//TODO: handle
 		}
 	}
 
 	protected abstract Thread getBoxThread();
 	protected abstract void renderGameSpecific(float timeDiff);
+	protected abstract IBoxesFactory getBoxesFactory();
+	protected abstract GameTypes getGameType();
 
 	@Override
 	public void resize(int width, int height) {
@@ -260,10 +231,7 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 	
 	private void setOpenGlDefault(){
 		Gdx.gl.glClearColor(0f, 0, 0, 1f);		
-		Gdx.gl.glClearDepthf(1.0f);
-		// Enables depth testing.
-		// The type of depth testing to do.
-		Gdx.gl.glDepthFunc(GL10.GL_LEQUAL);		
+		Gdx.gl.glClearDepthf(1.0f);		
 	}
 	
 	private void setInputAndStartBoxThread(){
@@ -277,84 +245,54 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 			//thread is already started - do nothing
 		}
 	}
+	
+	@Override
+	public void dispose() {
+	}
+
+	@Override
+	public void hide() {
+		//save score on hide!
+		SettingsHelper.addScore(mPointsManager.getScore(), mGameType);
+		mGameStatus = GameStatus.GAMEOVER; //because of outside app kill
+		while (mBoxThread.isAlive());		
+	}
+
+	@Override
+	public void pause() {
+	}
 
 	@Override
 	public void resume() {
-		setInputAndStartBoxThread();
-		setOpenGlDefault();
-		mGameStatus = mLastGameStatusBeforePause;
 	}
 
 	@Override
 	public void show() {
 		setInputAndStartBoxThread();
-	}
-	
-	private void updatePlayPosition(float dx, float dy){
-		if (mGameStatus != GameStatus.PLAY){
-			return;
-		}
-		
-		//todo: shrinking values of dx and dy are very dirty
-		switch (mUpgradeType){
-		case NOT_UPGRADE:
-			dx = dx / mNormalSpeedDivider;
-			dy = dy / mNormalSpeedDivider;
-			
-			mMainBall.friction = ChuckSphere.DEFAULT_FRICTION;
-			mMainBall.movingVelocity.x = fixSpeed(mMainBall.movingVelocity.x + dx);
-			mMainBall.movingVelocity.z = fixSpeed(mMainBall.movingVelocity.z + dy);
-			break;
-		case UPGRADE_EASY_CHANGE_DIRECTION:
-			dx = dx / mNormalSpeedDivider;
-			dy = dy / mNormalSpeedDivider;
-			
-			int oldSign = CollisionSolver.getSign(mMainBall.movingVelocity.x);
-			int incSign = CollisionSolver.getSign(dx);
-			//Math.abs(dx) > 2.0f  &&  
-			if (Math.abs(oldSign - incSign) == 2){
-				mMainBall.movingVelocity.x = 0.0f;// -mMainBall.movingVelocity.x;
-			}
-			
-			oldSign = CollisionSolver.getSign(mMainBall.movingVelocity.y);
-			incSign = CollisionSolver.getSign(dy);
-			if (Math.abs(oldSign - incSign) == 2){
-				mMainBall.movingVelocity.y = 0.0f; //-mMainBall.movingVelocity.y;
-			}
-			
-			mMainBall.friction = ChuckSphere.DEFAULT_FRICTION;
-			mMainBall.movingVelocity.x = fixSpeed(mMainBall.movingVelocity.x + dx);
-			mMainBall.movingVelocity.z = fixSpeed(mMainBall.movingVelocity.z + dy);
-			break;
-		case UPGRADE_SPEED:
-			dx = dx / mFastSpeedDivider;
-			dy = dy / mFastSpeedDivider;
-			
-			mMainBall.friction = ChuckSphere.DEFAULT_FRICTION;
-			mMainBall.movingVelocity.x = fixSpeed(mMainBall.movingVelocity.x + dx);
-			mMainBall.movingVelocity.z = fixSpeed(mMainBall.movingVelocity.z + dy);
-			break;
-		}
+		setOpenGlDefault();		
 	}
 	
 	@Override
 	public void onMove(int dx, int dy, int x, int y) {
-		updatePlayPosition(dx, dy);
+		if (mGameStatus == GameStatus.PLAY){
+			mChuckSphere.updatePlayerVelocity(dx, dy);
+		}
 	}
 
 	@Override
-	public void onClick(int x, int y) {	
+	public void onClick(int x, int y) {
+		if (mGameStatus == GameStatus.GAMEOVER){
+			//can not finish this screen until some time pass
+			if (mGameOverTimer > 0.8f){
+				mGame.setScreen(new MainMenuScreen(mGame));
+			}
+		}
 	}
 
 	@Override
 	public void onDoubleClick(int x, int y) {
 		if (mGameStatus == GameStatus.PLAY){
-			if (mMainBall.movingVelocity.z < 0){
-				mMainBall.movingVelocity.z = fixSpeed(mMainBall.movingVelocity.z - 120.0f);
-			}
-			else{
-				mMainBall.movingVelocity.z = fixSpeed(mMainBall.movingVelocity.z + 120.0f);
-			}
+			mChuckSphere.updatePlayerVelocityZSpecial();
 		}
 	}
 
@@ -363,6 +301,7 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 		mGame.setScreen(new MainMenuScreen(mGame));
 	}
 	
+	//// HELPER METHODS FOR realtive X, Y pixel position depending on screen width/height
 	protected float getScreenX(double x){
 		double rv = x * Gdx.graphics.getWidth() / 800.0;
 		return (float)rv;
