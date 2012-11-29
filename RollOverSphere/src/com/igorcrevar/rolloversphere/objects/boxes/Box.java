@@ -119,5 +119,4 @@ public class Box extends GameObject {
 	public boolean isNormalBox(){
 		return UpgradeType.NOT_UPGRADE == getUpgradeType();
 	}
-
 }

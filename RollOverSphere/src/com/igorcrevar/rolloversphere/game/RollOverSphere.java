@@ -18,6 +18,8 @@ public class RollOverSphere extends Game{
 
 		AssetsHelper.free();
 		//SettingsHelper.save();
-		getScreen().dispose();
+		if (getScreen() != null) {
+			getScreen().dispose();
+		}
 	}
 }

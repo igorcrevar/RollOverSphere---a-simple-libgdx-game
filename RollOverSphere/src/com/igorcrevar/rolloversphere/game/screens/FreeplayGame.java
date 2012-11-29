@@ -23,8 +23,7 @@ public class FreeplayGame extends TheGame{
 		//draw player points
 		mFont.setColor(Color.WHITE);
 		mFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-		String str = String.format("Points: %d", mPointsManager.getScore());
-		mFont.draw(mSpriteBatch, str, getScreenX(5.0f), getScreenY(5.0f));	
+		mFont.draw(mSpriteBatch, this.getPointsString(), getScreenX(5.0f), getScreenY(5.0f));	
 		
 		upgradeTimeoutUpdateAndRender(timeDiff);
 		renderNotificationText(timeDiff, 0.9f, 0.5f, NotifStates.NOT_SHOW);
@@ -32,27 +31,20 @@ public class FreeplayGame extends TheGame{
 		mPointsManager.update(timeDiff);	
 		mSpriteBatch.end();	
 	}
-
+	
+	float time = 0.0f;
+	float dec = 0.1f;
+	float sleep = 1.2f;
 	@Override
-	protected Thread getBoxThread() {
-		return new Thread(new Runnable() {			
-			@Override
-			public void run(){
-				while(mGameStatus == GameStatus.PLAY){
-					if (mBoxesManager.getBoxesCount() < 12){
-						mBoxesManager.addNew(mChuckSphere.position, mChuckSphere.boundingSphereR);
-					}
-					try {
-						long sleepTime = 1200 - mPointsManager.getScore() * 5;
-						if (sleepTime < 100){
-							sleepTime = 100;
-						}
-						Thread.sleep(sleepTime );
-					} catch (InterruptedException e) {
-					}
-				}
+	protected void addNewBox(float timeDiff) {
+		time += timeDiff;
+		if (time >= sleep) {
+			mBoxesManager.addNew(mChuckSphere.position, mChuckSphere.boundingSphereR);
+			time = 0.0f;
+			if (sleep > 0.1f) {
+				sleep -= dec;
 			}
-		});
+		}
 	}
 
 	@Override

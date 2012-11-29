@@ -37,8 +37,7 @@ public class ChallengeGame extends TheGame{
 		//draw player points
 		mFont.setColor(Color.WHITE);
 		mFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-		String str = String.format("Points: %d", mPointsManager.getScore());
-		mFont.draw(mSpriteBatch, str, getScreenX(5.0f), getScreenY(5.0f));	
+		mFont.draw(mSpriteBatch, this.getPointsString(), getScreenX(5.0f), getScreenY(5.0f));	
 		
 		if (GameStatus.PLAY == mGameStatus){
 			upgradeTimeoutUpdateAndRender(timeDiff);
@@ -58,26 +57,19 @@ public class ChallengeGame extends TheGame{
 		mSpriteBatch.end();
 	}
 	
+	float time = 0.0f;
+	float dec = 0.01f;
+	float sleep = 2.0f;
 	@Override
-	protected Thread getBoxThread() {
-		return new Thread(new Runnable() {			
-			@Override
-			public void run(){
-				long sleepTime = 2000;
-				long dec = 4;
-				while(mGameStatus == GameStatus.PLAY){
-					mBoxesManager.addNew(mChuckSphere.position, mChuckSphere.boundingSphereR);
-					try {						
-						Thread.sleep(sleepTime);
-					} catch (InterruptedException e) {
-					}
-					sleepTime -= dec;
-					if (sleepTime < 300){
-						sleepTime = 300;
-					}
-				}
+	protected void addNewBox(float timeDiff) {
+		time += timeDiff;
+		if (time >= sleep) {
+			mBoxesManager.addNew(mChuckSphere.position, mChuckSphere.boundingSphereR);
+			time = 0.0f;
+			if (sleep > 0.1f) {
+				sleep -= dec;
 			}
-		});
+		}
 	}
 
 	@Override

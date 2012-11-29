@@ -34,7 +34,6 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 	private Game mGame;
 	private BitmapFont mFont;
 	private MyInputAdapter mInputAdapter;
-	private Thread mMusicThread;
 	
 	private Camera mOtherCam;
 	private SpriteBatch mSpriteBatch;
@@ -114,14 +113,15 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 		mWaterBackground.update(deltaTime);
 		mWaterBackground.render(mOtherCam);	
 		
-		mSpriteBatch.begin();		
-		mFont.setScale(2.4f * Gdx.graphics.getWidth() / 800);
-		float dec = 4.0f *  Gdx.graphics.getWidth() / 800;
+		mSpriteBatch.begin();
+		float baseRation = Gdx.graphics.getWidth() / 800.0f;
+		mFont.setScale(baseRation * 2.4f);
+		float dec = baseRation * 4.0f;
 		for (OptionItem option: mOptions){
-			mFont.setColor(0.1f, 0.1f, 0.1f, 1.0f);
+			mFont.setColor(0.8f, 0.1f, 0.2f, 1.0f);
 			mFont.draw(mSpriteBatch, option.name, option.boundingBox.x - dec, 
-							Gdx.graphics.getHeight() - option.boundingBox.y + dec);
-			mFont.setColor(0.2f, 0.4f, 1.0f, 1.0f);
+					   Gdx.graphics.getHeight() - option.boundingBox.y + dec);
+			mFont.setColor(1.0f, 0.7f, 0.3f, 1.0f);
 			mFont.draw(mSpriteBatch, option.name, option.boundingBox.x, Gdx.graphics.getHeight() - option.boundingBox.y);
 		}
 		
@@ -136,10 +136,13 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 		else{
 			mFont.setScale(0.5f);
 		}
-		float dy = 20.0f * Gdx.graphics.getWidth() / 800;
-		float y = dy * 4;
+		float dy = baseRation * 20.0f;
+		float y = dy * 4.0f;
+		mFont.setColor(1.0f, 0.7f, 0.3f, 1.0f);
 		for (OptionItem option: mOptions){
-			mFont.draw(mSpriteBatch, String.format("%s: %d", option.name, SettingsHelper.getScore(option.type)), 20.0f, y);
+			//gwt  and string.format :(
+			String str = option.name + " " + SettingsHelper.getScore(option.type);			
+			mFont.draw(mSpriteBatch, str, 20.0f, y);
 			y -= dy;
 		}
 		mSpriteBatch.end();
@@ -151,10 +154,6 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 
 	@Override
 	public void hide() {
-		try {
-			mMusicThread.join();
-		} catch (InterruptedException e) {
-		};
 		AssetsHelper.music.stop();
 	}
 
@@ -187,19 +186,7 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 	public void show() {
 		Gdx.input.setInputProcessor(mInputAdapter);
 		
-		//play our theme melody after some time
-		mMusicThread = new Thread(new Runnable() {			
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-				}
-				AssetsHelper.music.play();				
-			}
-		});
-		
-		mMusicThread.start();
+		AssetsHelper.music.play();		
 	}
 
 	@Override
@@ -218,6 +205,7 @@ public class MainMenuScreen implements Screen, IMyInputAdapter{
 
 	@Override
 	public void onBack() {
+		Gdx.app.exit();
 	}
 
 }

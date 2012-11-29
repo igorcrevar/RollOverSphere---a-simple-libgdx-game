@@ -16,6 +16,8 @@ import com.igorcrevar.rolloversphere.game.GameTypes;
 import com.igorcrevar.rolloversphere.game.SettingsHelper;
 import com.igorcrevar.rolloversphere.input.IMyInputAdapter;
 import com.igorcrevar.rolloversphere.input.MyInputAdapter;
+import com.igorcrevar.rolloversphere.mesh_gl10.CubeMesh;
+import com.igorcrevar.rolloversphere.mesh_gl10.MeshManager;
 import com.igorcrevar.rolloversphere.objects.ChuckSphere;
 import com.igorcrevar.rolloversphere.objects.DynamicPlane;
 import com.igorcrevar.rolloversphere.objects.Floor;
@@ -42,7 +44,6 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 		PLAY, GAMEOVER
 	}
 	protected GameStatus mGameStatus;
-	protected Thread mBoxThread;
 	protected GameTypes mGameType;
 	//
 	protected float mGameOverTimer;
@@ -77,7 +78,8 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 		mFont = new BitmapFont();		
 		mPointsManager = new PointsManager(mFont, mSpriteBatch);
 		
-		mBoxesManager.init(-30, 30, -80, 0);
+		CubeMesh mesh = (CubeMesh)MeshManager.getInstance().getMesh("cube");
+		mBoxesManager.init(-30.0f, 30.0f, -80.0f, 0.0f, mesh.size);
 		
 		mWaterBackground.init();
 		mChuckSphere.init();
@@ -94,8 +96,6 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 		mFloor.position.z = -40.0f;
 		
 		Gdx.input.setInputProcessor(new MyInputAdapter(this));
-		
-		mBoxThread = getBoxThread();
 	}
 	
 	protected void createNotification(UpgradeType upgradeType, int timeout) {			
@@ -144,7 +144,8 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 				mUpgradeType = UpgradeType.NOT_UPGRADE;
 			}
 			else{
-				String str = String.format("Upgrade: %d", (int)(mUpgradeTimeout - mUpgradeTimer));
+				int time = (int)(mUpgradeTimeout - mUpgradeTimer);
+				String str = "Upgrade: " + time;
 				mFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
 				mFont.draw(mSpriteBatch, str, getScreenXEnd(200.0f), getScreenY(5.0f));
 			}
@@ -191,6 +192,7 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 			}
 		}			
 		
+		addNewBox(deltaTime);
 		mChuckSphere.render(mCamera);
 		renderGameSpecific(deltaTime);
 		
@@ -200,7 +202,7 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 		}
 	}
 
-	protected abstract Thread getBoxThread();
+	protected abstract void addNewBox(float timeDiff);
 	protected abstract void renderGameSpecific(float timeDiff);
 	protected abstract IBoxesFactory getBoxesFactory();
 	protected abstract GameTypes getGameType();
@@ -237,13 +239,6 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 	private void setInputAndStartBoxThread(){
 		Gdx.input.setInputProcessor(mInputAdapter);
 		Gdx.input.setCatchBackKey(true);
-		try
-		{
-			mBoxThread.start();
-		}
-		catch(IllegalThreadStateException ex){
-			//thread is already started - do nothing
-		}
 	}
 	
 	@Override
@@ -254,8 +249,7 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 	public void hide() {
 		//save score on hide!
 		SettingsHelper.addScore(mPointsManager.getScore(), mGameType);
-		mGameStatus = GameStatus.GAMEOVER; //because of outside app kill
-		while (mBoxThread.isAlive());		
+		mGameStatus = GameStatus.GAMEOVER; //because of outside app kill	
 	}
 
 	@Override
@@ -320,5 +314,11 @@ public abstract class TheGame implements Screen, IMyInputAdapter{
 	protected float getScreenYEnd(double y){
 		double rv = y * Gdx.graphics.getHeight() / 480.0;
 		return (float)rv;
+	}
+	
+	public String getPointsString() {
+		String str = "Points: " + mPointsManager.getScore();
+		//String.format("Points: %d", mPointsManager.getScore());
+		return str;
 	}
 }

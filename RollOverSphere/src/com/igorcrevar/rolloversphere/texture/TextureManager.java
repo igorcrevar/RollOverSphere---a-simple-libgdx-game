@@ -10,7 +10,6 @@ public class TextureManager {
 	private Map<String, Texture> mTextures = new HashMap<String, Texture>();
 	private boolean mIsLoaded = false;
 	private static TextureManager instance;
-	public static String textureBasePath = "assets/images/%s.jpg";
 	static
 	{
 		instance = new TextureManager();
@@ -20,10 +19,12 @@ public class TextureManager {
 		return instance;
 	}
 	
-	public void load(String[] keys, String[] files){
+	public void load(String[] keys, String[] files,  String basePath){
 		if (!mIsLoaded){
 			for (int i = 0; i < keys.length; ++i){
-				Texture txt = new Texture(Gdx.files.internal(String.format(textureBasePath, files[i])));
+				//because of gwt does not know format :(
+				String path = basePath.replace("%s", files[i]);
+				Texture txt = new Texture(Gdx.files.internal(path));
 				mTextures.put(keys[i], txt);
 			}
 			mIsLoaded = true;

@@ -18,7 +18,7 @@ public class AssetsHelper {
 	public static Music music;
 	
 	private static void loadTextures(){
-		TextureManager.getInstance().load(new String[] { "badlogic", "flag" }, new String[] { "badlogic", "flag" });
+		TextureManager.getInstance().load(new String[] { "badlogic", "flag" }, new String[] { "badlogic", "flag" }, "data/images/%s.jpg");
 	}
 
 	private static void loadMeshes(){
@@ -43,13 +43,13 @@ public class AssetsHelper {
 		mesh.createMesh();
 		MeshManager.getInstance().put("planexz", mesh);
 		
-		music = Gdx.audio.newMusic(Gdx.files.internal("assets/sounds/rolloversphere.ogg"));
+		music = Gdx.audio.newMusic(Gdx.files.internal("data/sounds/rolloversphere.ogg"));
 		music.setLooping(false);
 		music.setVolume(0.8f);
 	}
 	
 	public static void load () {
-		font = new BitmapFont(Gdx.files.internal("assets/font/font.fnt"), Gdx.files.internal("assets/font/font.png"), false);
+		font = new BitmapFont(Gdx.files.internal("data/font/font.fnt"), Gdx.files.internal("data/font/font.png"), false);
 		loadTextures();
 		loadMeshes();
 	}
