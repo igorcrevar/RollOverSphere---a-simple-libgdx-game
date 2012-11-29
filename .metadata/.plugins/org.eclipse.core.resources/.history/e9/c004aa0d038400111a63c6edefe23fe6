@@ -1,7 +1,0 @@
-package com.igorcrevar.punchthecircle;
-
-import com.igorcrevar.punchthecircle.collsion.ICollisionIterationHandler;
-
-public class Test implements ICollisionIterationHandler{
-
-}
