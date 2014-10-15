@@ -3,17 +3,17 @@
     <string name="app_name" translatable="false">Roll Over Ball!</string>
     <string name="gamehelper_sign_in_failed" translatable="false">Failed to sign in. Please check your network connection and try again.</string>
     <string name="gamehelper_app_misconfigured" translatable="false">The application is incorrectly configured. Check that the package name and signing certificate match the client ID created in Developer Console. Also, if the application is not yet published, check that the account you are trying to sign in with is listed as a tester account. See logs for more information.</string>
-    <string name="app_id" translatable="false">493162375052</string>
+    <string name="app_id" translatable="false">your_app_id</string>
     <string name="gamehelper_license_failed" translatable="false">License check failed.</string>
     <string name="gamehelper_unknown_error" translatable="false">Unknown error.</string>
     
-    <string name="achievement_played_1_time" translatable="false">CgkIjM-Slq0OEAIQAQ</string>
-    <string name="achievement_played_10_times" translatable="false">CgkIjM-Slq0OEAIQAg</string>
-    <string name="achievement_played_20_times" translatable="false">CgkIjM-Slq0OEAIQAw</string>
-    <string name="achievement_played_40_times" translatable="false">CgkIjM-Slq0OEAIQBA</string>
-    <string name="achievement_played_100_times" translatable="false">CgkIjM-Slq0OEAIQBQ</string>
- 	<string name="leaderboard_arcade_high_scores_easy" translatable="false">CgkIjM-Slq0OEAIQCA</string>
-  	<string name="leaderboard_arcade_high_scores_medium" translatable="false">CgkIjM-Slq0OEAIQCQ</string>
-  	<string name="leaderboard_arcade_high_scores_die_hard" translatable="false">CgkIjM-Slq0OEAIQCg</string>
-  	<string name="leaderboard_stress_free" translatable="false">CgkIjM-Slq0OEAIQCw</string>
+    <string name="achievement_played_1_time" translatable="false">your_achievment_id</string>
+    <string name="achievement_played_10_times" translatable="false">your_achievment_id</string>
+    <string name="achievement_played_20_times" translatable="false">your_achievment_id</string>
+    <string name="achievement_played_40_times" translatable="false">your_achievment_id</string>
+    <string name="achievement_played_100_times" translatable="false">your_achievment_id</string>
+ 	<string name="leaderboard_arcade_high_scores_easy" translatable="false">your_achievment_id</string>
+  	<string name="leaderboard_arcade_high_scores_medium" translatable="false">your_achievment_id</string>
+  	<string name="leaderboard_arcade_high_scores_die_hard" translatable="false">your_achievment_id</string>
+  	<string name="leaderboard_stress_free" translatable="false">your_achievment_id</string>
 </resources>
