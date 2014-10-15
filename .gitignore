@@ -1,8 +1,7 @@
-GDX-GWT
-GDX
-RollOverSphere-Html5
-RollOverSphere/bin
-RollOverSphere/hs_err*.log
-RollOverSphere-Android/bin
-RollOverSphere-Android/gen
+RollOverChuck/bin
+RollOverChuck/hs_err*.log
+RollOverChuck-desktop/bin
+RollOverChuck-desktop/hs_err*.log
+RollOverChuck-android/bin
+RollOverChuck-android/gen
 .metadata
