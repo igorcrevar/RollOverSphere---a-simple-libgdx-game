@@ -1,23 +1,36 @@
-# Roll Over Sphere!
+# Roll Over Chuck! (aka Roll Over Ball!) 
 
 #### Description
-This is(for now) just a simple "game"  where you can move sphere with swipe touch movements(or with mouse moves, while mouse is down on desktop). 
-Try to collect green and yellow cubes and bypass red ones. Small (blue and white) cubes are upgrades. 
-There are 3 modes(arcade - you have N seconds to earn your points, challenge where you must collect all point cubes, 
-a 3rd one is simple freeplay without any boundaries - just for fun!)
+https://play.google.com/store/apps/details?id=com.wayilookatgames.rolloverball
+Game published on Android market.
+Everything is here: code, music, graphics (if someone consider that crap as graphics :D)
+Uses excellent libgdx framework.
+I'm ok if someone use something from here for his/her own game (well I put MIT license on verything, even music), but I WILL BE MORE
+HAPPY if you tell/notify me about that. At least put a comment on google play link or drop me an email or something,
 
-#### Textures are...
-* one from libgdx package (this one is for sphere)
-* one from simpson game i played when i was young on game boy(stupid image, I will replace that as soon as I find something better)
+#### How to Build
+... import in eclipse and build like any other libgdx project
+For Desktop project you may need to fix assets linked source like this:
+- delete folder assets in RollOverChuck-desktop project.
+- Build Path -> Link source -> Choose assets folder of RollOverChuck-android project
 
-#### I'm pretty sure...
-...game works on samsung galaxy s2 and s.
+#### Google Play Desc
+Slide to move Chuck the ball, pick up cubes and get high score!
 
-#### Sound on menu screen...
-... is just a quick recording of me playing "Chuck Berry wanna be short riff". It has a lot of noise!
+Currently there are two modes:
+- Arcade
+- Stress free
 
-#### Other
-If anyone find this game concept interesting I will be glad if you CONTACT me(with a little effort maybe this can be something playable).
-If you (in some crasy case) just want to fork for your own game project I will not be that happy, but what the heck, this is free world and source 
-is relased with mit license so do what you want - I DO NOT care
+In Arcade mode you have 64 seconds to pick up cubes.
 
+Hard mode also has red cubes which gives you negative points.
+
+There are two "power-ups": one little cube to grow up the ball and one to shrink the ball.
+.
+Stress free mode is exactly like it sounds: you can play as long as you like.
+
+Google play service Leader-boards are included.
+
+Great rock'n'roll music!
+
+Every 4 games played, ad will be shown...

@@ -1,0 +1,89 @@
+
+base.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: y
+chuck_hand
+  rotate: false
+  xy: 236, 283
+  size: 40, 39
+  orig: 40, 39
+  offset: 0, 0
+  index: -1
+chuck_main
+  rotate: false
+  xy: 2, 218
+  size: 104, 104
+  orig: 104, 104
+  offset: 0, 0
+  index: -1
+chuck_mouth
+  rotate: false
+  xy: 68, 196
+  size: 33, 20
+  orig: 33, 20
+  offset: 0, 0
+  index: -1
+clock
+  rotate: false
+  xy: 174, 262
+  size: 60, 60
+  orig: 60, 60
+  offset: 0, 0
+  index: -1
+field1
+  rotate: false
+  xy: 2, 152
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+field2
+  rotate: false
+  xy: 108, 258
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+field3
+  rotate: false
+  xy: 2, 86
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+myfont
+  rotate: false
+  xy: 108, 231
+  size: 25, 25
+  orig: 25, 25
+  offset: 0, 0
+  index: -1
+myfont2
+  rotate: false
+  xy: 236, 271
+  size: 5, 10
+  orig: 5, 10
+  offset: 0, 0
+  index: -1
+myfont3
+  rotate: false
+  xy: 2, 2
+  size: 20, 20
+  orig: 20, 20
+  offset: 0, 0
+  index: -1
+point
+  rotate: false
+  xy: 2, 24
+  size: 60, 60
+  orig: 60, 60
+  offset: 0, 0
+  index: -1
+star
+  rotate: false
+  xy: 278, 302
+  size: 20, 20
+  orig: 20, 20
+  offset: 0, 0
+  index: -1
